@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
+    container_name: vertoz-prod-green
+    ports:
+      - "9093:8080"
+    environment:
+      - APP_VERSION=${DOCKER_TAG}
+      - ENVIRONMENT=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
