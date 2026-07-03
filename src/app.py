@@ -4,7 +4,6 @@ Vertoz Ad Analytics Application - CI/CD Demo
 """
 
 import os
-import json
 import logging
 from datetime import datetime
 from flask import Flask, jsonify
