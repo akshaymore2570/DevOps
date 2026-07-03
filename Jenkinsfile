@@ -1,6 +1,3 @@
-cd /mnt/vertoz-pipeline
-
-cat > Jenkinsfile << 'EOF'
 pipeline {
     agent any
     
@@ -32,12 +29,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                echo "==========================================="
-                echo "VERTAZ CI/CD PIPELINE"
-                echo "Application: ${APP_NAME}"
-                echo "Build: ${env.BUILD_NUMBER}"
-                echo "==========================================="
-                
+                echo "Pipeline Started"
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/master']],
@@ -46,7 +38,6 @@ pipeline {
                         credentialsId: ''
                     ]]
                 ])
-                
                 script {
                     env.GIT_COMMIT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     echo "Git Commit: ${env.GIT_COMMIT}"
@@ -174,6 +165,3 @@ pipeline {
         }
     }
 }
-EOF
-
-echo "Jenkinsfile updated!"
