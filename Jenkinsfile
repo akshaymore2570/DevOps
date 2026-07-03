@@ -1,3 +1,7 @@
+cd /mnt/vertoz-pipeline
+
+# Jenkinsfile mein repo URL fix karein
+cat > Jenkinsfile << 'EOF'
 pipeline {
     agent any
     
@@ -37,10 +41,10 @@ pipeline {
                 
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: '*/main']],
+                    branches: [[name: '*/master']],
                     userRemoteConfigs: [[
-                        url: 'https://github.com/yourusername/vertoz-pipeline.git',
-                        credentialsId: 'github-credentials'
+                        url: 'git@github.com:akshaymore2570/DevOps.git',
+                        credentialsId: ''
                     ]]
                 ])
                 
@@ -160,13 +164,13 @@ pipeline {
                     sh '''
                         echo "Running smoke tests..."
                         
-                        curl -f http://localhost:8080/health || {
+                        curl -f http://localhost:9090/health || {
                             echo "❌ Health check failed!"
                             exit 1
                         }
                         echo "✅ Health check passed"
                         
-                        curl -f http://localhost:8080/api/status || {
+                        curl -f http://localhost:9090/api/status || {
                             echo "❌ API check failed!"
                             exit 1
                         }
@@ -196,3 +200,6 @@ pipeline {
         }
     }
 }
+EOF
+
+echo "✅ Jenkinsfile updated!"
