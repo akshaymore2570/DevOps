@@ -1,6 +1,5 @@
 cd /mnt/vertoz-pipeline
 
-# Jenkinsfile mein repo URL fix karein
 cat > Jenkinsfile << 'EOF'
 pipeline {
     agent any
@@ -31,7 +30,7 @@ pipeline {
     }
     
     stages {
-        stage('📦 Checkout Code') {
+        stage('Checkout Code') {
             steps {
                 echo "==========================================="
                 echo "VERTAZ CI/CD PIPELINE"
@@ -55,7 +54,7 @@ pipeline {
             }
         }
         
-        stage('🐍 Setup Python') {
+        stage('Setup Python') {
             steps {
                 script {
                     sh '''
@@ -65,13 +64,13 @@ pipeline {
                         pip install --upgrade pip
                         pip install -r requirements.txt
                         pip install pytest pytest-cov black flake8
-                        echo "✅ Python setup complete"
+                        echo "Python setup complete"
                     '''
                 }
             }
         }
         
-        stage('✅ Code Quality') {
+        stage('Code Quality') {
             steps {
                 script {
                     sh '''
@@ -79,22 +78,22 @@ pipeline {
                         source venv/bin/activate
                         
                         black --check src/ || {
-                            echo "❌ Code formatting failed! Run: black src/"
+                            echo "Code formatting failed! Run: black src/"
                             exit 1
                         }
-                        echo "✅ Code formatting passed"
+                        echo "Code formatting passed"
                         
                         flake8 src/ --count --max-complexity=10 || {
-                            echo "❌ Linting failed!"
+                            echo "Linting failed!"
                             exit 1
                         }
-                        echo "✅ Linting passed"
+                        echo "Linting passed"
                     '''
                 }
             }
         }
         
-        stage('🧪 Unit Tests') {
+        stage('Unit Tests') {
             when {
                 expression { params.RUN_TESTS == true }
             }
@@ -114,7 +113,7 @@ pipeline {
                         COVERAGE=$(coverage report | grep TOTAL | awk '{print $4}' | sed 's/%//')
                         echo "Coverage: $COVERAGE%"
                         
-                        echo "✅ Unit tests completed"
+                        echo "Unit tests completed"
                     '''
                 }
             }
@@ -125,20 +124,20 @@ pipeline {
             }
         }
         
-        stage('🐳 Build Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
                     sh '''
                         echo "Building Docker image..."
                         docker build -t ${APP_NAME}:${DOCKER_TAG} .
                         docker tag ${APP_NAME}:${DOCKER_TAG} ${APP_NAME}:latest
-                        echo "✅ Docker image built"
+                        echo "Docker image built"
                     '''
                 }
             }
         }
         
-        stage('🚀 Deploy Locally') {
+        stage('Deploy Locally') {
             when {
                 expression { params.SKIP_DEPLOY == false }
             }
@@ -149,13 +148,13 @@ pipeline {
                         docker-compose down || true
                         docker-compose up -d --build
                         sleep 10
-                        echo "✅ Deployment complete"
+                        echo "Deployment complete"
                     '''
                 }
             }
         }
         
-        stage('🔥 Smoke Tests') {
+        stage('Smoke Tests') {
             when {
                 expression { params.SKIP_DEPLOY == false }
             }
@@ -165,18 +164,18 @@ pipeline {
                         echo "Running smoke tests..."
                         
                         curl -f http://localhost:9090/health || {
-                            echo "❌ Health check failed!"
+                            echo "Health check failed!"
                             exit 1
                         }
-                        echo "✅ Health check passed"
+                        echo "Health check passed"
                         
                         curl -f http://localhost:9090/api/status || {
-                            echo "❌ API check failed!"
+                            echo "API check failed!"
                             exit 1
                         }
-                        echo "✅ API check passed"
+                        echo "API check passed"
                         
-                        echo "✅ All smoke tests passed"
+                        echo "All smoke tests passed"
                     '''
                 }
             }
@@ -185,10 +184,10 @@ pipeline {
     
     post {
         success {
-            echo "🎉 PIPELINE COMPLETED SUCCESSFULLY!"
+            echo "PIPELINE COMPLETED SUCCESSFULLY!"
         }
         failure {
-            echo "❌ PIPELINE FAILED!"
+            echo "PIPELINE FAILED!"
         }
         always {
             script {
@@ -202,4 +201,4 @@ pipeline {
 }
 EOF
 
-echo "✅ Jenkinsfile updated!"
+echo "Jenkinsfile updated without comments!"
