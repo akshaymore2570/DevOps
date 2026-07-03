@@ -51,7 +51,7 @@ pipeline {
                     sh '''
                         echo "Setting up Python..."
                         python3 -m venv venv
-                        source venv/bin/activate
+                        . venv/bin/activate
                         pip install --upgrade pip
                         pip install -r requirements.txt
                         pip install pytest pytest-cov black flake8
@@ -66,7 +66,7 @@ pipeline {
                 script {
                     sh '''
                         echo "Running code quality checks..."
-                        source venv/bin/activate
+                        . venv/bin/activate
                         black --check src/ || exit 1
                         echo "Code formatting passed"
                         flake8 src/ --count --max-complexity=10 || exit 1
@@ -84,7 +84,7 @@ pipeline {
                 script {
                     sh '''
                         echo "Running unit tests..."
-                        source venv/bin/activate
+                        . venv/bin/activate
                         pytest tests/unit/ --cov=src/ --cov-report=xml --cov-report=term --junitxml=test-reports/results.xml -v || true
                         COVERAGE=$(coverage report | grep TOTAL | awk '{print $4}' | sed 's/%//')
                         echo "Coverage: $COVERAGE%"
