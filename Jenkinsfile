@@ -76,17 +76,9 @@ pipeline {
                     sh '''
                         echo "Running code quality checks..."
                         source venv/bin/activate
-                        
-                        black --check src/ || {
-                            echo "Code formatting failed! Run: black src/"
-                            exit 1
-                        }
+                        black --check src/ || exit 1
                         echo "Code formatting passed"
-                        
-                        flake8 src/ --count --max-complexity=10 || {
-                            echo "Linting failed!"
-                            exit 1
-                        }
+                        flake8 src/ --count --max-complexity=10 || exit 1
                         echo "Linting passed"
                     '''
                 }
@@ -102,17 +94,9 @@ pipeline {
                     sh '''
                         echo "Running unit tests..."
                         source venv/bin/activate
-                        
-                        pytest tests/unit/ \
-                            --cov=src/ \
-                            --cov-report=xml \
-                            --cov-report=term \
-                            --junitxml=test-reports/results.xml \
-                            -v || true
-                        
+                        pytest tests/unit/ --cov=src/ --cov-report=xml --cov-report=term --junitxml=test-reports/results.xml -v || true
                         COVERAGE=$(coverage report | grep TOTAL | awk '{print $4}' | sed 's/%//')
                         echo "Coverage: $COVERAGE%"
-                        
                         echo "Unit tests completed"
                     '''
                 }
@@ -162,19 +146,10 @@ pipeline {
                 script {
                     sh '''
                         echo "Running smoke tests..."
-                        
-                        curl -f http://localhost:9090/health || {
-                            echo "Health check failed!"
-                            exit 1
-                        }
+                        curl -f http://localhost:9090/health || exit 1
                         echo "Health check passed"
-                        
-                        curl -f http://localhost:9090/api/status || {
-                            echo "API check failed!"
-                            exit 1
-                        }
+                        curl -f http://localhost:9090/api/status || exit 1
                         echo "API check passed"
-                        
                         echo "All smoke tests passed"
                     '''
                 }
@@ -201,4 +176,4 @@ pipeline {
 }
 EOF
 
-echo "Jenkinsfile updated without comments!"
+echo "Jenkinsfile updated!"
