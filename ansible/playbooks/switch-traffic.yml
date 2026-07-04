@@ -1,0 +1,21 @@
+---
+- name: Switch Traffic to {{ color }}
+  hosts: web_servers
+  become: true
+  vars:
+    app_name: "vertoz-ad-analytics"
+    color: "{{ color | default('green') }}"
+    port: "{{ color == 'green' ? '8081' : '8080' }}"
+    
+  tasks:
+    - name: Update Nginx to point to {{ color }}
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/{{ app_name }}
+      notify: restart nginx
+    
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

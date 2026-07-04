@@ -1,0 +1,76 @@
+---
+- name: Deploy Vertoz Application
+  hosts: web_servers
+  become: true
+  vars:
+    app_name: "vertoz-ad-analytics"
+    app_port: 8080
+    deploy_dir: "/opt/{{ app_name }}"
+    
+  tasks:
+    - name: Display deployment info
+      debug:
+        msg: |
+          Deploying {{ app_name }}
+          Environment: {{ deploy_env }}
+          Image: {{ docker_image }}
+          Commit: {{ git_commit | default('unknown') }}
+    
+    - name: Create deployment directory
+      file:
+        path: "{{ deploy_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0755
+    
+    - name: Pull Docker image
+      docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+        force_source: yes
+    
+    - name: Stop old container
+      docker_container:
+        name: "{{ app_name }}"
+        state: stopped
+      ignore_errors: yes
+    
+    - name: Remove old container
+      docker_container:
+        name: "{{ app_name }}"
+        state: absent      ignore_errors: yes
+    
+    - name: Run new container
+      docker_container:
+        name: "{{ app_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ app_port }}:8080"
+        volumes:
+          - "{{ deploy_dir }}/data:/app/data"
+        env:
+          APP_ENV: "{{ deploy_env }}"
+          APP_VERSION: "{{ docker_tag | default('latest') }}"
+          GIT_COMMIT: "{{ git_commit | default('unknown') }}"
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 30s
+    
+    - name: Wait for container to be healthy
+      uri:
+        url: "http://localhost:{{ app_port }}/health"
+        status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 10
+      delay: 10
+    
+    - name: Deployment complete
+      debug:
+        msg: "✅ {{ app_name }} deployed successfully"

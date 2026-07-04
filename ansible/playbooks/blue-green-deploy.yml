@@ -1,0 +1,20 @@
+---
+- name: Blue-Green Deployment
+  hosts: web_servers
+  become: true
+  vars:
+    app_name: "vertoz-ad-analytics"
+    color: "{{ color | default('green') }}"
+    
+  tasks:
+    - name: Deploy {{ color }} version
+      docker_container:
+        name: "{{ app_name }}-{{ color }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ color == 'green' ? '8081' : '8080' }}:8080"
+        env:
+          COLOR: "{{ color }}"
+          VERSION: "{{ docker_tag }}"
