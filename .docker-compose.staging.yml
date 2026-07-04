@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
     container_name: vertoz-staging
     ports:
       - "9091:8080"
     environment:
-      - APP_VERSION=1.0.0
+      - APP_VERSION=${DOCKER_TAG}
       - ENVIRONMENT=staging
     restart: unless-stopped
     healthcheck:
